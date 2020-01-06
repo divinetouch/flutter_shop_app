@@ -14,7 +14,11 @@ class ProductsGrid extends StatelessWidget {
       itemCount: loadedProducts.length,
       itemBuilder: (ctx, index) => MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => loadedProducts[index]),
+          // ChangeNotifierProvider(create: (_) => loadedProducts[index]),
+          ChangeNotifierProvider.value(
+            key: Key('product'),
+            value: loadedProducts[index],
+          ),
         ],
         child: ProductItem(),
       ),
