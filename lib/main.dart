@@ -48,18 +48,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-//   return MaterialApp(
-//       title: 'MyShop',
-//       theme: ThemeData(
-//         primarySwatch: Colors.purple,
-//         accentColor: Colors.deepOrange,
-//         fontFamily: 'Lato',
-//       ),
-//       home: ProductsOverviewScreen(),
-//       routes: {
-//         ProductsOverviewScreen.routeName: (context) =>
-//             ProductsOverviewScreen(),
-//         ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
-//       });
-// }
-// }
