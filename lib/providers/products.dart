@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import './product.dart';
 
 class Products with ChangeNotifier {
+  final productsUrl = DotEnv().env['API_PRODUCTS_URL'];
+
   List<Product> _items = [
     Product(
       id: 'p1',
@@ -50,15 +56,28 @@ class Products with ChangeNotifier {
     return _items.where((product) => product.isFavorite).toList();
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-        title: product.title,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        price: product.price,
-        id: DateTime.now().toString());
-    _items.add(newProduct);
-    notifyListeners();
+  void addProduct(Product product) async {
+    var response = await http.post(
+      productsUrl,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    );
+    var parsedResponse = json.decode(response.body);
+    if (parsedResponse['error'] == null) {
+      final newProduct = Product(
+          title: product.title,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          id: json.decode(response.body)['name']);
+      _items.add(newProduct);
+      notifyListeners();
+    }
   }
 
   Product findById(String id) {
