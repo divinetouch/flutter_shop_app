@@ -51,12 +51,33 @@ class Products with ChangeNotifier {
   }
 
   void addProduct(Product product) {
-    _items.add(product);
+    final newProduct = Product(
+        title: product.title,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        price: product.price,
+        id: DateTime.now().toString());
+    _items.add(newProduct);
     notifyListeners();
   }
 
   Product findById(String id) {
     return _items.firstWhere((product) => product.id == id);
+  }
+
+  void updateProduct(String id, Product product) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = product;
+      notifyListeners();
+    } else {
+      print('...');
+    }
+  }
+
+  void deleteProduc(String id) {
+    _items.removeWhere((prod) => prod.id == id);
+    notifyListeners();
   }
 
   // void showFavoritesOnly() {
