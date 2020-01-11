@@ -56,7 +56,7 @@ class Products with ChangeNotifier {
     return _items.where((product) => product.isFavorite).toList();
   }
 
-  void addProduct(Product product) async {
+  Future<void> addProduct(Product product) async {
     var response = await http.post(
       productsUrl,
       body: json.encode({
@@ -74,9 +74,12 @@ class Products with ChangeNotifier {
           description: product.description,
           imageUrl: product.imageUrl,
           price: product.price,
-          id: json.decode(response.body)['name']);
+          id: parsedResponse['name']);
       _items.add(newProduct);
       notifyListeners();
+    } else {
+      print('Error: ${parsedResponse['error']}');
+      throw Error.safeToString(parsedResponse['error']);
     }
   }
 
