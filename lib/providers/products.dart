@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import './product.dart';
+import '../models/http_exception.dart';
 
 class Products with ChangeNotifier {
   final productsUrl = DotEnv().env['API_PRODUCTS_URL'];
@@ -132,16 +133,19 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduc(String id) {
+  Future<void> deleteProduct(String id) async {
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
-    http.delete('$productUpdateUrl/$id.json').then((_) {
-      existingProduct = null;
-    }).catchError((_) {
-      _items.insert(existingProductIndex, existingProduct);
-    });
     notifyListeners();
+    final response = await http.delete('$productUpdateUrl/$id.json');
+    if (response.statusCode > 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException('Could not delete ${existingProduct.title}.');
+    }
+
+    existingProduct = null;
   }
 
   // void showFavoritesOnly() {
