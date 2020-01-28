@@ -56,19 +56,42 @@ class Products with ChangeNotifier {
     return _items.where((product) => product.isFavorite).toList();
   }
 
+  Future<void> fetchAndSetProducts() async {
+    try {
+      final response = await http.get(productsUrl);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      List<Product> loadedProducts = [];
+      extractedData.forEach((id, product) {
+        loadedProducts.add(
+          Product(
+              id: id,
+              title: product['title'],
+              description: product['description'],
+              price: product['price'],
+              isFavorite: product['isFavorite'],
+              imageUrl: product['imageUrl']),
+        );
+      });
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   Future<void> addProduct(Product product) async {
-    var response = await http.post(
-      productsUrl,
-      body: json.encode({
-        'title': product.title,
-        'description': product.description,
-        'imageUrl': product.imageUrl,
-        'price': product.price,
-        'isFavorite': product.isFavorite,
-      }),
-    );
-    var parsedResponse = json.decode(response.body);
-    if (parsedResponse['error'] == null) {
+    try {
+      var response = await http.post(
+        productsUrl,
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        }),
+      );
+      var parsedResponse = json.decode(response.body);
       final newProduct = Product(
           title: product.title,
           description: product.description,
@@ -77,9 +100,9 @@ class Products with ChangeNotifier {
           id: parsedResponse['name']);
       _items.add(newProduct);
       notifyListeners();
-    } else {
-      print('Error: ${parsedResponse['error']}');
-      throw Error.safeToString(parsedResponse['error']);
+    } catch (error) {
+      print(error);
+      throw error;
     }
   }
 
