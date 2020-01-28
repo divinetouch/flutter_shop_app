@@ -7,6 +7,7 @@ import './product.dart';
 
 class Products with ChangeNotifier {
   final productsUrl = DotEnv().env['API_PRODUCTS_URL'];
+  final productUpdateUrl = DotEnv().env['API_PRODUCT_UPDATE_URL'];
 
   List<Product> _items = [
     Product(
@@ -110,9 +111,20 @@ class Products with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  void updateProduct(String id, Product product) {
+  Future<void> updateProduct(String id, Product product) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
+      await http.patch(
+        '$productUpdateUrl/$id.json',
+        body: json.encode(
+          {
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'imageUrl': product.imageUrl
+          },
+        ),
+      );
       _items[prodIndex] = product;
       notifyListeners();
     } else {
@@ -121,7 +133,14 @@ class Products with ChangeNotifier {
   }
 
   void deleteProduc(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
+    http.delete('$productUpdateUrl/$id.json').then((_) {
+      existingProduct = null;
+    }).catchError((_) {
+      _items.insert(existingProductIndex, existingProduct);
+    });
     notifyListeners();
   }
 
