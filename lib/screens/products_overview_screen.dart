@@ -28,9 +28,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Products>(context, listen: false)
-          .fetchAndSetProducts()
-          .then((_) {
+      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
         setState(() {
           _isLoading = false;
         });
@@ -38,6 +36,10 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     }
     _isInit = false;
     super.didChangeDependencies();
+  }
+
+  Future<void> _refreshProducts(BuildContext context) async {
+    await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
   }
 
   @override
@@ -81,11 +83,14 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ProductsGrid(showOnlyFavorites: _showOnlyFavorites),
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProducts(context),
+        child: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ProductsGrid(showOnlyFavorites: _showOnlyFavorites),
+      ),
     );
   }
 }
